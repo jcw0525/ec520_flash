@@ -6,11 +6,11 @@ filename_flash = 'carpet_00_flash.tif';
 filename_noflash = 'carpet_01_noflash.tif';
 fn = strcat(filepath,filename_flash);
 flash_img = (imread(fn)); 
-magnificationFactor = .2; 
+magnificationFactor = .25; 
 flash_img = imresize(flash_img,magnificationFactor);
 fn = strcat(filepath,filename_noflash);
 noflash_img = (imread(fn)); 
-magnificationFactor = .2; 
+magnificationFactor = .25; 
 noflash_img = imresize(noflash_img,magnificationFactor);
 
 
@@ -24,10 +24,12 @@ M = 0;
 A_final_5 = {A_final,F_base,F_detail,A_base,A_NR};
 sgtitle("Width = 5")
 f_width = 10; 
-A_final_10 = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+A_final_10 = {A_final,F_base,F_detail,A_base,A_NR};
 sgtitle("Width = 10")
 f_width = 20; 
-A_final_20 = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+A_final_20 = {A_final,F_base,F_detail,A_base,A_NR};
 sgtitle("Width = 20")
 
 %Test Different Sigma_d
@@ -36,7 +38,8 @@ sigma_d = 24;
 sigma_r_bilat = 20; 
 sigma_r_joint = 0.001*256; 
 M = 0; 
-A_final_sigmad24 = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+A_final_sigmad_24 = {A_final,F_base,F_detail,A_base,A_NR};
 sgtitle("Width = 5, Sigma_d = 24")
 
 %Test Different Sigma_r_bilat
@@ -45,7 +48,9 @@ sigma_d = 48;
 sigma_r_bilat = 12; 
 sigma_r_joint = 0.001*256; 
 M = 0; 
-A_final_sigmar_bilat = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+A_final_sigmar_bilat_12 = {A_final,F_base,F_detail,A_base,A_NR};
+
 sgtitle("Width = 5, Sigma_d = 48, Simga_r = 5%")
 
 %Test Different Mask Weights
@@ -54,7 +59,9 @@ sigma_d = 48;
 sigma_r_bilat = 20; 
 sigma_r_joint = 0.001*256; 
 M = 1; 
-A_final_Mask1 = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+A_final_Mask1 = {A_final,F_base,F_detail,A_base,A_NR};
+
 sgtitle("M = 1")
 
 f_width = 5; 
@@ -62,7 +69,8 @@ sigma_d = 48;
 sigma_r_bilat = 20; 
 sigma_r_joint = 0.001*256; 
 M = 0.25; 
-A_final_Maskp25 = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+A_final_Maskp25 = {A_final,F_base,F_detail,A_base,A_NR};
 sgtitle("M = 0.25")
 
 f_width = 5; 
@@ -70,7 +78,8 @@ sigma_d = 48;
 sigma_r_bilat = 20; 
 sigma_r_joint = 0.001*256; 
 M = 0.5; 
-A_final_Maskp5 = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint, M);
+A_final_Maskp5 = {A_final,F_base,F_detail,A_base,A_NR};
 sgtitle("M = 0.5")
 
 
@@ -120,16 +129,22 @@ function [A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flas
     figure; 
     subplot(2,3,1)
     imshow(flash_img);
+    title("F: Flash Image")
     subplot(2,3,4);
     imshow(noflash_img);
+    title("A: No Flash Image")
     subplot(2,3,2);
     imshow(uint8(F_base));
+    title("F Base: Flash Bilateral Image")
     subplot(2,3,5)
     imshow(F_detail);
+    title("F Detail: Detail Transfer Image")
     subplot(2,3,3)
     imshow(uint8(A_NR));
+    title("A NR: Joint Bilateral Filter Image")
     subplot(2,3,6)
     imshow(uint8(A_final));
+    title("A Final: Final Image")
 end 
 
 function h = bilat_filt_1d(f, width, sigma_d, sigma_r)
