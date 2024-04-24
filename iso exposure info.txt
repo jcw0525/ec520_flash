@@ -1,0 +1,3 @@
+no flash: iso 2000; exposure 1/15s
+flash 2: iso 32; exposure 1/32s
+flash 1: iso 500; exposure 1/40s
