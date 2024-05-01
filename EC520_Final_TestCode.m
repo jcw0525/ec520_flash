@@ -9,9 +9,17 @@ fn = strcat(filepath,filename_flash);
 flash_img = (imread(fn)); 
 magnificationFactor = 0.2; 
 flash_img = imresize(flash_img,magnificationFactor);
+flash_iso = imfinfo(fn).DigitalCamera.ISOSpeedRatings; 
+flash_exp_t = 1/40; 
+%flash_iso = 500;
+%flash_exp_t = 1/40; 
 fn = strcat(filepath,filename_noflash);
 noflash_img = (imread(fn)); 
 noflash_img = imresize(noflash_img,magnificationFactor);
+noflash_iso = imfinfo(fn).DigitalCamera.ISOSpeedRatings; 
+noflash_exp_t = 1/15; 
+%noflash_iso = 2000;
+%noflash_exp_t = 1/15; 
 
 fn = strcat(filepath,filename_bilat);
 bilat_img = (imread(fn)); 
@@ -22,35 +30,107 @@ result_img = imresize(result_img,magnificationFactor);
 
 
 %%
+f_width = 0.1; 
+sigma_d = 48; 
+sigma_r_bilat = 20; 
+sigma_r_joint = 0.001*256; 
+linear_scaling_factor = flash_iso*flash_exp_t/(noflash_iso*noflash_exp_t);
+[A_final1,F_base1,F_detail1,A_base1,A_NR1] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint,linear_scaling_factor);
 
+figure; 
+subplot(1,3,1);
+imshow(uint8(noflash_img));
+title("No Flash Image")
+subplot(1,3,2);
+imshow(uint8(flash_img));
+title("Flash Image")
+subplot(1,3,3);
+imshow(uint8(A_final1));
+title("Final Image")
+
+% f_width = 0.5; 
+% sigma_d = 48; 
+% sigma_r_bilat = 20; 
+% sigma_r_joint = 0.001*256; 
+% linear_scaling_factor = flash_iso*flash_exp_t/(noflash_iso*noflash_exp_t);
+% [A_final2,F_base2,F_detail2,A_base2,A_NR2] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint,linear_scaling_factor);
+
+
+% 
+% f_width = 0.1; 
+% sigma_d = 24; 
+% sigma_r_bilat = 12; 
+% sigma_r_joint = 0.001*256; 
+% linear_scaling_factor = flash_iso*flash_exp_t/(noflash_iso*noflash_exp_t);
+% [A_final3,F_base3,F_detail3,A_base3,A_NR3] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint,linear_scaling_factor);
+
+
+% f_width = 0.1; 
+% sigma_d = 12; 
+% sigma_r_bilat = 20; 
+% sigma_r_joint = 0.001*256; 
+% linear_scaling_factor = flash_iso*flash_exp_t/(noflash_iso*noflash_exp_t);
+% [A_final4,F_base4,F_detail4,A_base4,A_NR4] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint,linear_scaling_factor);
+
+%%
+figure; 
+subplot(1,4,1);
+imshow(uint8(noflash_img));
+title("A")
+xlim([200,350])
+ylim([100,250])
+subplot(1,4,2);
+imshow(uint8(A_base1));
+title("Gaussian Cutoff = 0.1")
+xlim([200,350])
+ylim([100,250])
+
+subplot(1,4,3);
+imshow(uint8(A_base2));
+title("Gaussian Cutoff = 0.5")
+xlim([200,350])
+ylim([100,250])
+
+subplot(1,4,4);
+Z = imabsdiff(A_base1,A_base2);
+imshow(rgb2gray(Z));
+title("Difference")
+xlim([200,350])
+ylim([100,250])
+
+
+
+%%
 %Test Different f_widths: 
 f_width = 0.5; 
 sigma_d = 48; 
 sigma_r_bilat = 20; 
 sigma_r_joint = 0.001*256; 
-[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint);
-A_final_p5 = {A_final,F_base,F_detail,A_base,A_NR};
-sgtitle("Mag Cutoff = 0.5, Sigma_d = 48, Sigma_r = 20")
-f_width = 0.9; 
-[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint);
-A_final_p9 = {A_final,F_base,F_detail,A_base,A_NR};
-sgtitle("Mag Cutoff = 0.9, Sigma_d = 48, Sigma_r = 20")
-f_width = 0.3; 
-[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint);
-A_final_p3 = {A_final,F_base,F_detail,A_base,A_NR};
-sgtitle("Mag Cutoff = 0.3, Sigma_d = 48, Sigma_r = 20")
-f_width = 0.1; 
-[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint);
-A_final_p1 = {A_final,F_base,F_detail,A_base,A_NR};
-sgtitle("Mag Cutoff = 0.1, Sigma_d = 48, Sigma_r = 20")
+linear_scaling_factor = flash_iso*flash_exp_t/(noflash_iso*noflash_exp_t);
+
+% [A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint,linear_scaling_factor);
+% A_final_p5 = {A_final,F_base,F_detail,A_base,A_NR};
+% sgtitle("Mag Cutoff = 0.5, Sigma_d = 48, Sigma_r = 20")
+% f_width = 0.9; 
+% [A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint,linear_scaling_factor);
+% A_final_p9 = {A_final,F_base,F_detail,A_base,A_NR};
+% sgtitle("Mag Cutoff = 0.9, Sigma_d = 48, Sigma_r = 20")
+% f_width = 0.3; 
+% [A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint,linear_scaling_factor);
+% A_final_p3 = {A_final,F_base,F_detail,A_base,A_NR};
+% sgtitle("Mag Cutoff = 0.3, Sigma_d = 48, Sigma_r = 20")
+% f_width = 0.1; 
+% [A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint,linear_scaling_factor);
+% A_final_p1 = {A_final,F_base,F_detail,A_base,A_NR};
+% sgtitle("Mag Cutoff = 0.1, Sigma_d = 48, Sigma_r = 20")
 
 %Test Different Sigma_d
-f_width = 0.9; 
+f_width = 0.1; 
 sigma_d = 24; 
 sigma_r_bilat = 20; 
 sigma_r_joint = 0.001*256; 
 M = 0; 
-[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint);
+[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint,linear_scaling_factor);
 A_final_sigmad_24 = {A_final,F_base,F_detail,A_base,A_NR};
 sgtitle("Mag Cutoff = 0.9, Sigma_d = 24, Sigma_r = 20")
 
@@ -60,7 +140,7 @@ sigma_d = 48;
 sigma_r_bilat = 12; 
 sigma_r_joint = 0.001*256; 
 M = 0; 
-[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint);
+[A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flash_img, f_width, sigma_d, sigma_r_bilat, sigma_r_joint,linear_scaling_factor);
 A_final_sigmar_bilat_12 = {A_final,F_base,F_detail,A_base,A_NR};
 sgtitle("Mag Cutoff = 0.9, Sigma_d = 48, Sigma_r = 12")
 
@@ -714,7 +794,7 @@ function [A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flas
     imshow(uint8(F_base));
     title("F Base: Flash Bilateral Image")
     subplot(2,3,5)
-    imshow(rescale(F_detail),[0, max(max(max(F_detail)))+1]);
+    imshow(rescale(rgb2gray(F_detail)))
     title("F Detail: Detail Transfer Image")
     subplot(2,3,3)
     imshow(uint8(A_NR));
