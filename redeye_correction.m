@@ -41,7 +41,7 @@ title("seed pixels, image " + imID + ", k = " + k);
 %determine elliptical constraints
 R = R - min(min(R));
 Rmask = zeros(size(R));
-stats = regionprops("table", Rseed>0, "Centroid", "MajorAxisLength");
+stats = regionprops("table", Rseed>0, "Centroid", "MajorAxisLength", "MinorAxisLength");
 centers = stats.Centroid;
 majors = stats.MajorAxisLength;
 for i = 1:size(centers)
@@ -75,5 +75,35 @@ FinalImage(:,:,2) = (1-Rmask).*FinalImage(:,:,2) + .8*Rmask.*(A_YCC(:,:,1));
 FinalImage(:,:,3) = (1-Rmask).*FinalImage(:,:,3) + .8*Rmask.*(A_YCC(:,:,1));
 
 figure(5);
+imshow(FinalImage, []);
+title("final corrected image");
+
+figure(6);
+subplot(1,3,1);
+imshow(Rmask, []);
+title("final red eye mask");
+subplot(1,3,2);
+imshow(imread(fn), []);
+title("original image");
+subplot(1,3,3);
+imshow(FinalImage, []);
+title("final corrected image");
+
+figure(7);
+
+fn = strcat(filepath,imID,filename_noflash);
+A_YCC = rgb2ycbcr(double(imread(fn))/256.0);
+
+subplot(1,3,1);
+imshow(imread(fn), []);
+title("original no flash image");
+
+fn = strcat(filepath,imID,filename_flash);
+F_YCC = rgb2ycbcr(double(imread(fn))/256.0);
+
+subplot(1,3,2);
+imshow(imread(fn), []);
+title("original flash image");
+subplot(1,3,3);
 imshow(FinalImage, []);
 title("final corrected image");
