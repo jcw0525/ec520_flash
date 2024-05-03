@@ -5,29 +5,24 @@ filename_noflash = 'carpet_01_noflash.tif';
 filename_bilat = 'carpet_02_bilateral.tif';
 filename_result = 'carpet_03_our_result.tif';
 
+%Load in Files and Settings
 fn = strcat(filepath,filename_flash);
 flash_img = (imread(fn)); 
-magnificationFactor = 0.2; 
+magnificationFactor = 0.25; 
 flash_img = imresize(flash_img,magnificationFactor);
 flash_iso = imfinfo(fn).DigitalCamera.ISOSpeedRatings; 
 flash_exp_t = 1/40; 
-%flash_iso = 500;
-%flash_exp_t = 1/40; 
 fn = strcat(filepath,filename_noflash);
 noflash_img = (imread(fn)); 
 noflash_img = imresize(noflash_img,magnificationFactor);
 noflash_iso = imfinfo(fn).DigitalCamera.ISOSpeedRatings; 
 noflash_exp_t = 1/15; 
-%noflash_iso = 2000;
-%noflash_exp_t = 1/15; 
-
 fn = strcat(filepath,filename_bilat);
 bilat_img = (imread(fn)); 
 bilat_img = imresize(bilat_img,magnificationFactor);
 fn = strcat(filepath,filename_result);
 result_img = (imread(fn)); 
 result_img = imresize(result_img,magnificationFactor);
-
 
 %%
 f_width = 0.1; 
@@ -736,9 +731,9 @@ function [A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flas
     F3 = flash_img(:,:,3);
     F = flash_img;
     F_base = zeros(size(flash_img));
-    F_base(:,:,1) = bilat_filt_1d(double(F1),f_width,sigma_d,sigma_r_bilat);
-    F_base(:,:,2) = bilat_filt_1d(double(F2),f_width,sigma_d,sigma_r_bilat);
-    F_base(:,:,3) = bilat_filt_1d(double(F3),f_width,sigma_d,sigma_r_bilat);
+    F_base(:,:,1) = bilat_filt(double(F1),f_width,sigma_d,sigma_r_bilat);
+    F_base(:,:,2) = bilat_filt(double(F2),f_width,sigma_d,sigma_r_bilat);
+    F_base(:,:,3) = bilat_filt(double(F3),f_width,sigma_d,sigma_r_bilat);
    
     
     %Detail Transfer on Flash Image
@@ -766,9 +761,9 @@ function [A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flas
     A2 = noflash_img(:,:,2);
     A3 = noflash_img(:,:,3);
     A_base = zeros(size(noflash_img));
-    A_base(:,:,1) = bilat_filt_1d(double(A1),f_width,sigma_d,sigma_r_bilat);
-    A_base(:,:,2) = bilat_filt_1d(double(A2),f_width,sigma_d,sigma_r_bilat);
-    A_base(:,:,3) = bilat_filt_1d(double(A3),f_width,sigma_d,sigma_r_bilat);
+    A_base(:,:,1) = bilat_filt(double(A1),f_width,sigma_d,sigma_r_bilat);
+    A_base(:,:,2) = bilat_filt(double(A2),f_width,sigma_d,sigma_r_bilat);
+    A_base(:,:,3) = bilat_filt(double(A3),f_width,sigma_d,sigma_r_bilat);
     
     
     %Joint Bilateral Filter on No Flash Image
@@ -776,9 +771,9 @@ function [A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flas
     A2 = noflash_img(:,:,2);
     A3 = noflash_img(:,:,3);
     A_NR = zeros(size(noflash_img));
-    A_NR(:,:,1) = joint_bilat_filt_1d(double(F1),double(A1),f_width,sigma_d,sigma_r_joint);
-    A_NR(:,:,2) = joint_bilat_filt_1d(double(F2),double(A2),f_width,sigma_d,sigma_r_joint);
-    A_NR(:,:,3) = joint_bilat_filt_1d(double(F3),double(A3),f_width,sigma_d,sigma_r_joint);
+    A_NR(:,:,1) = joint_bilat_filt(double(F1),double(A1),f_width,sigma_d,sigma_r_joint);
+    A_NR(:,:,2) = joint_bilat_filt(double(F2),double(A2),f_width,sigma_d,sigma_r_joint);
+    A_NR(:,:,3) = joint_bilat_filt(double(F3),double(A3),f_width,sigma_d,sigma_r_joint);
     
     %Final Image
     A_final = (1-M).*A_NR.*F_detail + M.*A_base;
@@ -804,7 +799,7 @@ function [A_final,F_base,F_detail,A_base,A_NR] = run_algorithm(noflash_img, flas
     title("A Final: Final Image")
 end 
 
-function h = bilat_filt_1d(f, mag_cutoff, sigma_d, sigma_r)
+function h = bilat_filt(f, mag_cutoff, sigma_d, sigma_r)
     
     %Note: variable notation used is from the Tomasi Paper
 
@@ -845,7 +840,7 @@ function h = bilat_filt_1d(f, mag_cutoff, sigma_d, sigma_r)
     
 end
 
-function h = joint_bilat_filt_1d(flash_img,noflash_img, mag_cutoff, sigma_d, sigma_r)
+function h = joint_bilat_filt(flash_img,noflash_img, mag_cutoff, sigma_d, sigma_r)
     
     %Note: variable notation used is from the Tomasi Paper
 

@@ -7,6 +7,6 @@ sigma = 10;
 Z = exp(-1/2*(x.^2+y.^2)/sigma^2);
 figure; 
 surf(x,y,Z)
-xlim([-10,10])
-ylim([-10,10])
+xlim([-20,20])
+ylim([-20,20])
 zlim([0 1])
