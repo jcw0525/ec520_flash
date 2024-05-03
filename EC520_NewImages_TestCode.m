@@ -15,16 +15,16 @@
 % noflash_iso = 2000;
 % noflash_exposuret = 1/15; 
 
-filepath = '/Users/abbyskerker/Documents/GitHub/ec520_flash/';
-filename_flash = 'flash2.jpg';
-filename_noflash = 'noflash2.jpg';
+filepath = '';
+filename_flash = 'flash1.jpg';
+filename_noflash = 'noflash1.jpg';
 
 fn = strcat(filepath,filename_flash);
 flash_img = (imread(fn)); 
 magnificationFactor = 0.2; 
 flash_img = imresize(flash_img,magnificationFactor);
-flash_iso = 32;
-flash_exposuret = 1/32; 
+flash_iso = 500;
+flash_exposuret = 1/40;
 
 fn = strcat(filepath,filename_noflash);
 noflash_img = (imread(fn)); 
